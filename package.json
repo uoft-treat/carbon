@@ -16,6 +16,7 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
+    "@babel/standalone": "^7.5.4",
     "axios": "^0.19.0",
     "inversify": "^5.0.1",
     "xml-js": "^1.6.11"
