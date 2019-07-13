@@ -1,4 +1,6 @@
-# Carbon <small>(6, 12.011)</small>
+# <img src="https://i.imgur.com/IbGhq1L.png" alt="Carbon" width="100"/> Carbon
+
+
 
 Carbon is a real-time RPEL and rendering engine for TREAT widgets.
 
