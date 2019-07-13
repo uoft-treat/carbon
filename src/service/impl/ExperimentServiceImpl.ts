@@ -43,7 +43,7 @@ export class ExperimentServiceImpl implements ExperimentService {
      * @param name
      */
     async getExperimentDefinition(name: String): Promise<ExperimentDefinition> {
-        const data = await this.webRequestAgent.getObject("http://localhost:5000/my-experiment.xml");
+        const data = await this.webRequestAgent.getObject("http://localhost:5000/dist/my-experiment.xml");
 
         const parsedData = await XmlParser.parseXmlFromString(data.data);
 
