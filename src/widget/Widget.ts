@@ -28,6 +28,8 @@ export class Widget {
 
     private readonly _styleSource: string;
 
+    private _styleMounted: boolean = false;
+
     constructor(
         uuid: string,
         name: string,
@@ -44,6 +46,14 @@ export class Widget {
 
     getTransformedSource() {
         return Babel.transform(this.scriptSource, { presets: ['es2015'] }).code;
+    }
+
+    public mountStyleGlobally() {
+        if(!this._styleMounted) {
+            let styleEl = document.createElement("style");
+            styleEl.innerHTML = this.styleSource;
+            document.head.appendChild(styleEl);
+        }
     }
 
 }

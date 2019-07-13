@@ -1,5 +1,5 @@
 declare global {
-    interface Window { Carbon: any; }
+    interface Window { Carbon: any; Vue: any; }
 }
 
 import container    from "./inversify.config";

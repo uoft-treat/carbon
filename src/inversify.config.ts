@@ -10,6 +10,7 @@ import {ExperimentServiceImpl} from "./service/impl/ExperimentServiceImpl";
 import {GqlRequestAgent}       from "./agent/GqlRequestAgent";
 import {GqlRequestAgentImpl}   from "./agent/impl/GqlRequestAgentImpl";
 import {WidgetPool}            from "./widget/WidgetPool";
+import {DomMounter}            from "./dom/DomMounter";
 
 let container = new Container();
 
@@ -21,5 +22,8 @@ container.bind<Experiment>("Experiment").to(Experiment);
 container.bind<ExperimentService>("ExperimentService").to(ExperimentServiceImpl);
 
 container.bind<WidgetPool>("WidgetPool").to(WidgetPool).inSingletonScope();
+
+container.bind<DomMounter>("DomMounter").to(DomMounter).inSingletonScope();
+
 
 export default container;
