@@ -6,6 +6,7 @@ import {DomMounter}               from "../dom/DomMounter";
 import {ExperimentDefinitionNode} from "../type/ExperimentDefinition";
 import {Section}                  from "../dom/Section";
 import {WidgetInstance}           from "../widget/WidgetInstance";
+import * as Babel                 from '@babel/standalone';
 
 @injectable()
 export class Experiment {
@@ -22,6 +23,8 @@ export class Experiment {
     private domMounter: DomMounter;
 
     private _widgetInstances: WidgetInstance[] = [];
+
+    private _widgetData = {};
 
     private _uuid: String;
 
@@ -48,12 +51,12 @@ export class Experiment {
                 await this.mountDomByDefinition(newSection, child);
             }
         } else if (node.type === "widget") {
-            await this.mountWidgetToSection(sectionNode, node.attributes.uuid);
+            await this.mountWidgetToSection(sectionNode, node.attributes.uuid, node.attributes.id);
         }
 
     }
 
-    private async mountWidgetToSection(section: Section, uuid: string) {
+    private async mountWidgetToSection(section: Section, uuid: string, id: string) {
         let widget = await this.widgetPool.getWidget(uuid);
         widget.mountStyleGlobally();
         const wrapperSection = new Section();
@@ -64,6 +67,11 @@ export class Experiment {
 
         let inputs = {...scriptEval.inputs};
         let outputs = {...scriptEval.outputs};
+
+        this._widgetData[id] = {
+            inputs,
+            outputs,
+        };
 
         const vm = new window.Vue({
             el: `#${wrapperSection.elementId}`,
@@ -80,6 +88,7 @@ export class Experiment {
         widgetInstance.inputs = inputs;
         widgetInstance.outputs = outputs;
         widgetInstance.widget = widget;
+        widgetInstance.id = id;
 
         this._widgetInstances.push(widgetInstance);
 
@@ -93,10 +102,37 @@ export class Experiment {
             if (child.type === "section") {
                 await this.mountDomByDefinition(rootSection, child);
             } else if (child.type === "widget") {
-                await this.mountWidgetToSection(rootSection, child.attributes.uuid);
+                await this.mountWidgetToSection(rootSection, child.attributes.uuid, child.attributes.name);
             }
         }
 
+        // Mount the controller VM
+        const script = Babel.transform(def.script, {presets: ['es2015']}).code;
+        let scriptEval = eval(script);
+
+        const vm = new window.Vue({
+            el: `#sample`,
+            data: {
+                widgetData: this._widgetData,
+            },
+            mounted: scriptEval.onMount,
+            watch: {
+                widgetData: {
+                    handler: scriptEval.onWidgetStateChange,
+                    deep: true,
+                }
+            }
+        });
+
+    }
+
+    getWidgetInstanceById(id: string): WidgetInstance | null {
+        for (const instance of this.widgetInstances) {
+            if (instance.id === id) {
+                return instance;
+            }
+        }
+        return null;
     }
 
 

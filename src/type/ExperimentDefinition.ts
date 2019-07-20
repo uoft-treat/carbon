@@ -7,5 +7,6 @@ export type ExperimentDefinitionNode = {
 export type ExperimentDefinition = {
     uuid: string,
     name: string,
+    script: string,
     canvasNodes: ExperimentDefinitionNode[],
 }

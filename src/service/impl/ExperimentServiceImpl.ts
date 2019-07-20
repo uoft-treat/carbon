@@ -44,12 +44,14 @@ export class ExperimentServiceImpl implements ExperimentService {
      */
     async getExperimentDefinition(name: String): Promise<ExperimentDefinition> {
         const data = await this.webRequestAgent.getObject("http://localhost:5000/dist/my-experiment.xml");
+        const script = await this.webRequestAgent.getObject("http://localhost:5000/dist/my-experiment.js");
 
         const parsedData = await XmlParser.parseXmlFromString(data.data);
 
         let definition: ExperimentDefinition = {
             name: parsedData["Experiment"]["_attributes"]["name"],
             uuid: parsedData["Experiment"]["_attributes"]["uuid"],
+            script: script.data,
             canvasNodes: []
         };
 

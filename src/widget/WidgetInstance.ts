@@ -17,4 +17,6 @@ export class WidgetInstance {
 
     public widget: Widget;
 
+    public id: string;
+
 }
