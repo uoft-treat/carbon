@@ -39,19 +39,16 @@ export class ExperimentServiceImpl implements ExperimentService {
     }
 
     /**
-     * Read experiment definition from remote.
-     * @param name
+     * Convert strings to experiment definition.
      */
-    async getExperimentDefinition(name: String): Promise<ExperimentDefinition> {
-        const data = await this.webRequestAgent.getObject("http://localhost:5000/dist/my-experiment.xml");
-        const script = await this.webRequestAgent.getObject("http://localhost:5000/dist/my-experiment.js");
+    async getExperimentDefinitionFromXml(script: string, xml: string): Promise<ExperimentDefinition> {
 
-        const parsedData = await XmlParser.parseXmlFromString(data.data);
+        const parsedData = await XmlParser.parseXmlFromString(xml);
 
         let definition: ExperimentDefinition = {
             name: parsedData["Experiment"]["_attributes"]["name"],
             uuid: parsedData["Experiment"]["_attributes"]["uuid"],
-            script: script.data,
+            script: script,
             canvasNodes: []
         };
 
@@ -79,12 +76,12 @@ export class ExperimentServiceImpl implements ExperimentService {
     }
 
     private recursivelyGetDependents(node: ExperimentDefinitionNode, dependents: string[]): void {
-        if(node.type === "widget") {
-            if(dependents.indexOf(node.attributes.uuid) < 0) {
+        if (node.type === "widget") {
+            if (dependents.indexOf(node.attributes.uuid) < 0) {
                 dependents.push(node.attributes.uuid);
             }
         }
-        for(const child of node.children) {
+        for (const child of node.children) {
             this.recursivelyGetDependents(child, dependents);
         }
     }
@@ -95,7 +92,7 @@ export class ExperimentServiceImpl implements ExperimentService {
      */
     getDependentWidgetsByDefinition(definition: ExperimentDefinition): string[] {
         let dependents: string[] = [];
-        for(const child of definition.canvasNodes) {
+        for (const child of definition.canvasNodes) {
             this.recursivelyGetDependents(child, dependents);
         }
         return dependents;

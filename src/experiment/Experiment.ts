@@ -1,15 +1,26 @@
-import {inject, injectable}       from "inversify";
-import {ExperimentService}        from "../service/ExperimentService";
-import {WidgetPool}               from "../widget/WidgetPool";
-import * as uuid                  from 'uuid/v4';
-import {DomMounter}               from "../dom/DomMounter";
-import {ExperimentDefinitionNode} from "../type/ExperimentDefinition";
-import {Section}                  from "../dom/Section";
-import {WidgetInstance}           from "../widget/WidgetInstance";
-import * as Babel                 from '@babel/standalone';
+import {inject, injectable}                             from "inversify";
+import {ExperimentService}                              from "../service/ExperimentService";
+import {WidgetPool}                                     from "../widget/WidgetPool";
+import * as uuid                                        from 'uuid/v4';
+import {DomMounter}                                     from "../dom/DomMounter";
+import {ExperimentDefinition, ExperimentDefinitionNode} from "../type/ExperimentDefinition";
+import {Section}                                        from "../dom/Section";
+import {WidgetInstance}                                 from "../widget/WidgetInstance";
+import * as Babel                                       from '@babel/standalone';
+import {Widget}                                         from "../widget/Widget";
+// import Vue                                              from '@uoft-treat/carbon-vue';
 
 @injectable()
 export class Experiment {
+
+    get definition(): ExperimentDefinition {
+        return this._definition;
+    }
+
+    set definition(value: ExperimentDefinition) {
+        this._definition = value;
+    }
+
     get widgetInstances(): WidgetInstance[] {
         return this._widgetInstances;
     }
@@ -30,6 +41,8 @@ export class Experiment {
 
     private _id: String;
 
+    private _definition: ExperimentDefinition;
+
     constructor(
         @inject("ExperimentService") experimentService: ExperimentService,
         @inject("WidgetPool") widgetPool: WidgetPool,
@@ -41,9 +54,11 @@ export class Experiment {
         this._id = uuid();
     }
 
+    public injectWidgetToPool(uuid: string, widget: Widget) {
+        this.widgetPool.injectWidget(uuid, widget);
+    }
 
     private async mountDomByDefinition(sectionNode: Section, node: ExperimentDefinitionNode) {
-
         if (node.type === "section") {
             const newSection = new Section();
             sectionNode.appendChild(newSection);
@@ -53,7 +68,6 @@ export class Experiment {
         } else if (node.type === "widget") {
             await this.mountWidgetToSection(sectionNode, node.attributes.uuid, node.attributes.id);
         }
-
     }
 
     private async mountWidgetToSection(section: Section, uuid: string, id: string) {
@@ -83,6 +97,8 @@ export class Experiment {
             methods: {...scriptEval.methods},
         });
 
+        console.log(scriptEval.methods);
+
         const widgetInstance = new WidgetInstance();
         widgetInstance.vm = vm;
         widgetInstance.inputs = inputs;
@@ -95,10 +111,13 @@ export class Experiment {
     }
 
     async mount(selector: string) {
-        const def = await this.experimentService.getExperimentDefinition("my-experiment");
+
+        if (!this._definition) {
+            throw new Error("Experiment definition not loaded.");
+        }
 
         let rootSection = this.domMounter.mountSectionById(selector);
-        for (const child of def.canvasNodes) {
+        for (const child of this._definition.canvasNodes) {
             if (child.type === "section") {
                 await this.mountDomByDefinition(rootSection, child);
             } else if (child.type === "widget") {
@@ -107,11 +126,13 @@ export class Experiment {
         }
 
         // Mount the controller VM
-        const script = Babel.transform(def.script, {presets: ['es2015']}).code;
+        const script = Babel.transform(this._definition.script, {presets: ['es2015']}).code;
+
         let scriptEval = eval(script);
 
+        let controllerSection = this.domMounter.mountSectionById(selector);
         const vm = new window.Vue({
-            el: `#sample`,
+            el: `#${controllerSection.elementId}`,
             data: {
                 widgetData: this._widgetData,
             },

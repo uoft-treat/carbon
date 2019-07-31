@@ -9,7 +9,62 @@
     <body>
 
     <div id="mounting-point"></div>
-    <div id="sample"></div>
+
+    <script>
+
+        (async() => {
+            let experiment = Carbon.createExperiment();
+            experiment.definition = await Carbon.experimentService.getExperimentDefinitionFromXml(
+                `
+                export default {
+
+                    onMount: function () {
+                        this.widgetData["submit-button"].inputs.width  = 300;
+                        this.widgetData["submit-button"].inputs.height = 300;
+                    },
+
+                    onWidgetStateChange: function () {
+
+                        this.widgetData["submit-button"].inputs.text =
+                            "This button have been clicked for " + this.widgetData["submit-button"].outputs.numClicks + " times!!" +
+                            "Last hover coord is " + JSON.stringify(this.widgetData["submit-button"].outputs.lastHoverLocation);
+
+                        this.widgetData["other-button"].inputs.text = "My name...";
+
+                        console.log("Widget state changed...");
+                    }
+                }
+                `,
+                    `
+                <?xml version="1.0"?>
+                <Experiment
+                        name="My Cool Experiment"
+                        uuid="11d55937-d06f-4dd8-96d1-49d0dd9126cf"
+                >
+                    <Canvas>
+                        <Section>
+                            <Section>
+                                <Widget
+                                        uuid="51bf9c0a-f0cf-4ba2-8098-649ec12faa74"
+                                        id="submit-button"
+                                />
+
+                                <Widget
+                                        uuid="51bf9c0a-f0cf-4ba2-8098-649ec12faa74"
+                                        id="other-button"
+                                />
+                            </Section>
+                        </Section>
+                    </Canvas>
+                </Experiment>
+                `
+            );
+            console.log(experiment.definition);
+            await experiment.mount("mounting-point");
+        })();
+
+    </script>
+
     </body>
 
 </html>

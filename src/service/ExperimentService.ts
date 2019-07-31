@@ -2,7 +2,7 @@ import {ExperimentDefinition} from "../type/ExperimentDefinition";
 
 export interface ExperimentService {
 
-    getExperimentDefinition(name: String): Promise<ExperimentDefinition>;
+    getExperimentDefinitionFromXml(script: string, xml: string): Promise<ExperimentDefinition>;
 
     getDependentWidgetsByDefinition(definition: ExperimentDefinition): string[];
 

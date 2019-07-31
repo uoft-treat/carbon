@@ -21,6 +21,10 @@ export class WidgetPool {
         this.configuration = configuration;
     }
 
+    injectWidget(uuid: string, widget: Widget) {
+        this.widgets[uuid] = widget;
+    }
+
     /**
      * Get a widget by UUID from pool.
      * @param uuid
