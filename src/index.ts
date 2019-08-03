@@ -1,9 +1,12 @@
+declare global {
+    interface Window { Carbon: any; Vue: any; }
+}
+
 import container    from "./inversify.config";
 import {Experiment} from "./experiment/Experiment";
+import {ExperimentService} from "./service/ExperimentService";
 
-const experiment = container.get<Experiment>("Experiment");
-
-
-(async() => {
-    await experiment.mount();
-})();
+window.Carbon = {
+    createExperiment: () => container.get<Experiment>("Experiment"),
+    experimentService: container.get<ExperimentService>("ExperimentService")
+};
