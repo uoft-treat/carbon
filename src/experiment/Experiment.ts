@@ -156,7 +156,6 @@ export class Experiment {
         return null;
     }
 
-
     get uuid(): String {
         return this._uuid;
     }
