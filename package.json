@@ -13,11 +13,11 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "reflect-metadata": "^0.1.13",
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^9.4.2",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3",
-    "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.5"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   },
   "dependencies": {
     "@babel/standalone": "^7.5.4",
